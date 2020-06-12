@@ -52,6 +52,8 @@ Using this playbook, you can get the following services configured on your serve
 
 - (optional) the [matrix-appservice-webhooks](https://github.com/turt2live/matrix-appservice-webhooks) bridge for slack compatible webhooks ([ConcourseCI](https://concourse-ci.org/), [Slack](https://slack.com/) etc. pp.)
 
+- (optional) the [matrix-sms-bridge](https://github.com/benkuly/matrix-sms-bridge) for bridging your Matrix server to SMS
+
 - (optional) [Email2Matrix](https://github.com/devture/email2matrix) for relaying email messages to Matrix rooms
 
 - (optional) [Dimension](https://github.com/turt2live/matrix-dimension), an open source integrations manager for matrix clients
@@ -144,7 +146,11 @@ This playbook sets up your server using the following Docker images:
 
 - [turt2live/matrix-appservice-webhooks](https://hub.docker.com/r/turt2live/matrix-appservice-webhooks) - the [Appservice Webhooks](https://github.com/turt2live/matrix-appservice-webhooks) bridge (optional)
 
+- [folivonet/matrix-sms-bridge](https://hub.docker.com/repository/docker/folivonet/matrix-sms-bridge) - the [matrix-sms-brdige](https://github.com/benkuly/matrix-sms-bridge) (optional)
+
 - [sorunome/mx-puppet-skype](https://hub.docker.com/r/sorunome/mx-puppet-skype) - the [mx-puppet-skype](https://github.com/Sorunome/mx-puppet-skype) bridge to [Skype](https:/www.skype.com) (optional)
+
+- [sorunome/mx-puppet-slack](https://hub.docker.com/r/sorunome/mx-puppet-slack) - the [mx-puppet-slack](https://github.com/Sorunome/mx-puppet-slack) bridge to [Slack](https:/slack.com) (optional)
 
 - [turt2live/matrix-dimension](https://hub.docker.com/r/turt2live/matrix-dimension) - the [Dimension](https://dimension.t2bot.io/) integrations manager (optional)
 

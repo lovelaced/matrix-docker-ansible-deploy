@@ -104,11 +104,19 @@ server {
 </VirtualHost>
 ```
 
-**For Caddy**, it would be something like this:
+**For Caddy 2**, it would be something like this:
 
 ```caddy
 reverse_proxy /.well-known/matrix/* https://matrix.DOMAIN {
 	header_up Host {http.reverse_proxy.upstream.hostport}
+}
+```
+
+**For Caddy 1**, it would be something like this:
+
+```caddy
+proxy /.well-known/matrix/ https://matrix.DOMAIN {
+    header_upstream Host {http.reverse_proxy.upstream.hostport}
 }
 ```
 
@@ -128,7 +136,7 @@ backend matrix-backend
 	reqirep ^(GET|POST|HEAD)\ /.well-known/matrix/(.*) \1\ /\2
 	# Rewrite redirects as ProxyPassReverse does
 	acl response-is-redirect res.hdr(Location) -m found
-	rsprep ^Location:\ (http|https)://matrix.example.com\/(.*) Location:\ \1://matrix.exapmle.com/.well-known/matrix/\2 if response-is-redirect
+	rsprep ^Location:\ (http|https)://matrix.example.com\/(.*) Location:\ \1://matrix.example.com/.well-known/matrix/\2 if response-is-redirect
 ```
 
 Make sure to:
