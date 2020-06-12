@@ -15,8 +15,26 @@
     state: directory
     mode: 0750
     owner: "{{ matrix_user_username }}"
-    group: "{{ matrix_user_username }}"
+    group: "{{ matrix_user_groupname }}"
   when: "not local_path_media_store_stat.failed and not local_path_media_store_stat.stat.exists"
+
+- name: Ensure Synapse repository is present on self-build
+  git:
+    repo: https://github.com/matrix-org/synapse.git
+    dest: "{{ matrix_synapse_docker_src_files_path }}"
+    version: "{{ matrix_synapse_docker_image.split(':')[1] }}"
+    force: "yes"
+  when: "matrix_synapse_container_image_self_build"
+
+- name: Ensure Synapse Docker image is built
+  docker_image:
+    name: "{{ matrix_synapse_docker_image }}"
+    source: build
+    build:
+      dockerfile: docker/Dockerfile
+      path: "{{ matrix_synapse_docker_src_files_path }}"
+      pull: yes
+  when: "matrix_synapse_container_image_self_build"
 
 - name: Ensure Synapse Docker image is pulled
   docker_image:
@@ -24,6 +42,7 @@
     source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
     force_source: "{{ matrix_synapse_docker_image_force_pull if ansible_version.major > 2 or ansible_version.minor >= 8 else omit }}"
     force: "{{ omit if ansible_version.major > 2 or ansible_version.minor >= 8 else matrix_synapse_docker_image_force_pull }}"
+  when: "not matrix_synapse_container_image_self_build"
 
 - name: Check if a Synapse signing key exists
   stat:
@@ -45,6 +64,8 @@
     --user={{ matrix_user_uid }}:{{ matrix_user_gid }}
     --cap-drop=ALL
     -v {{ matrix_synapse_config_dir_path }}:/data
+    -e UID={{ matrix_user_uid }}
+    -e GID={{ matrix_user_gid }}
     -e SYNAPSE_CONFIG_PATH=/data/homeserver.yaml
     -e SYNAPSE_SERVER_NAME={{ matrix_server_fqn_matrix }}
     -e SYNAPSE_REPORT_STATS=no
@@ -58,7 +79,7 @@
     dest: "{{ matrix_synapse_config_dir_path }}/homeserver.yaml"
     mode: 0644
     owner: "{{ matrix_user_username }}"
-    group: "{{ matrix_user_username }}"
+    group: "{{ matrix_user_groupname }}"
 
 - name: Ensure Synapse log config installed
   template:
@@ -69,7 +90,7 @@
 - name: Ensure matrix-synapse.service installed
   template:
     src: "{{ role_path }}/templates/synapse/systemd/matrix-synapse.service.j2"
-    dest: "/etc/systemd/system/matrix-synapse.service"
+    dest: "{{ matrix_systemd_path }}/matrix-synapse.service"
     mode: 0644
   register: matrix_synapse_systemd_service_result
 
@@ -81,5 +102,5 @@
 - name: Ensure matrix-synapse-register-user script created
   template:
     src: "{{ role_path }}/templates/synapse/usr-local-bin/matrix-synapse-register-user.j2"
-    dest: "/usr/local/bin/matrix-synapse-register-user"
+    dest: "{{ matrix_local_bin_path }}/matrix-synapse-register-user"
     mode: 0750

@@ -1,3 +1,250 @@
+# 2020-06-11
+
+## SMS bridging requires db reset
+
+The current version of [matrix-sms-bridge](https://github.com/benkuly/matrix-sms-bridge) needs you to delete the database to work as expected. Just remove `/matrix/matrix-sms-bridge/database/*`. It also adds a new requried var `matrix_sms_bridge_default_region`.
+
+To reuse your existing rooms, invite `@smsbot:yourServer` to the room or write a message. You are also able to use automated room creation with telephonenumers by writing `sms send -t 01749292923 "Hello World"` in a room with `@smsbot:yourServer`. See [the docs](https://github.com/benkuly/matrix-sms-bridge) for more information.
+
+# 2020-06-05
+
+## SMS bridging support
+
+Thanks to [benkuly](https://github.com/benkuly)'s efforts, the playbook now supports bridging to SMS (with one telephone number only) via [matrix-sms-bridge](https://github.com/benkuly/matrix-sms-bridge).
+
+See our [Setting up Matrix SMS bridging](docs/configuring-playbook-matrix-bridge-sms.md) documentation page for getting started.
+
+
+# 2020-05-19
+
+## (Compatibility Break / Security Issue) Disabling User Directory search powered by the ma1sd Identity Server
+
+User Directory search requests used to go to the ma1sd identity server by default, which queried its own stores and the Synapse database.
+
+ma1sd current has [a security issue](https://github.com/ma1uta/ma1sd/issues/44), which made it leak information about all users - including users created by bridges, etc.
+
+Until the issue gets fixed, we're making User Directory search not go to ma1sd by default. You **need to re-run the playbook and restart services to apply this workaround**.
+
+*If you insist on restoring the old behavior* (**which has a security issue!**), you *might* use this configuration: `matrix_nginx_proxy_proxy_matrix_user_directory_search_enabled: "{{ matrix_ma1sd_enabled }}"`
+
+
+# 2020-04-28
+
+## Newer IRC bridge (with potential breaking change)
+
+This upgrades matrix-appservice-irc from 0.14.1 to 0.16.0.  Upstream
+made a change to how you define manual mappings.  If you added a
+`mapping` to your configuration, you will need to update it accoring
+to the [upstream
+instructions](https://github.com/matrix-org/matrix-appservice-irc/blob/master/CHANGELOG.md#0150-2020-02-05).
+If you did not include `mappings` in your configuration for IRC, no
+change is necessary.  `mappings` is not part of the default
+configuration.
+
+
+# 2020-04-23
+
+## Slack bridging support
+
+Thanks to [Rodrigo Belem](https://github.com/rbelem)'s efforts, the playbook now supports bridging to [Slack](https://slack.com) via the [mx-puppet-slack](https://github.com/Sorunome/mx-puppet-slack) bridge.
+
+See our [Setting up MX Puppet Slack bridging](docs/configuring-playbook-bridge-mx-puppet-slack.md) documentation page for getting started.
+
+
+# 2020-04-09
+
+## Skype bridging support
+
+Thanks to [Rodrigo Belem](https://github.com/rbelem)'s efforts, the playbook now supports bridging to [Skype](https://www.skype.com) via the [mx-puppet-skype](https://github.com/Sorunome/mx-puppet-skype) bridge.
+
+See our [Setting up MX Puppet Skype bridging](docs/configuring-playbook-bridge-mx-puppet-skype.md) documentation page for getting started.
+
+
+# 2020-04-05
+
+## Private Jitsi support
+
+The [Jitsi support](#jitsi-support) we had landed a few weeks ago was working well, but it was always open to the whole world.
+
+Running such an open instance is not desirable to most people, so [teutat3s](https://github.com/teutat3s) has contributed support for making Jitsi use authentication.
+
+To make your Jitsi server more private, see the [configure internal Jitsi authentication and guests mode](docs/configuring-playbook-jitsi.md#optional-configure-internal-jitsi-authentication-and-guests-mode) section in our Jitsi documentation.
+
+
+# 2020-04-03
+
+## (Potential Backward Compatibility Break) ma1sd replaces mxisd
+
+Thanks to [Marcel Partap](https://github.com/eMPee584)'s efforts, the [mxisd](https://github.com/kamax-io/mxisd) identity server, which has been deprecated for a long time, has finally been replaced by [ma1sd](https://github.com/ma1uta/ma1sd), a compatible fork.
+
+**If you're using the default playbook configuration**, you don't need to do anything -- your mxisd installation will be replaced with ma1sd and all existing data will be migrated automatically the next time you run the playbook.
+
+**If you're doing something more special** (defining custom `matrix_mxisd_*` variables), the playbook will ask you to rename them to `matrix_ma1sd_*`.
+You're also encouraged to test that ma1sd works well for such a more custom setup.
+
+
+# 2020-03-29
+
+## Archlinux support
+
+Thanks to [Christian Lupus](https://github.com/christianlupus)'s efforts, the playbook now supports installing to an [Archlinux](https://www.archlinux.org/) server.
+
+
+# 2020-03-24
+
+## Jitsi support
+
+The playbook can now (optionally) install the [Jitsi](https://jitsi.org/) video-conferencing platform and integrate it with [Riot](docs/configuring-playbook-riot-web.md).
+
+See our [Jitsi documentation page](docs/configuring-playbook-jitsi.md) to get started.
+
+
+# 2020-03-15
+
+## Raspberry Pi support
+
+Thanks to [Gergely Horváth](https://github.com/hooger)'s effort, the playbook supports installing to a Raspberry Pi server, for at least some of the services.
+
+Since most ready-made container images do not support that architecture, we achieve this by building images locally on the device itself.
+See our [Self-building documentation page](docs/self-building.md) for how to get started.
+
+
+# 2020-02-26
+
+## Riot-web themes are here
+
+The playbook now makes it easy to install custom riot-web themes.
+
+To learn more, take a look at our [riot-web documentation on Themes](docs/configuring-playbook-riot-web.md#themes).
+
+
+# 2020-02-24
+
+## Customize the server name in Riot's login page
+
+You can now customize the server name string that Riot-web displays in its login page.
+
+These playbook variables, with these default values, have been added:
+
+```
+matrix_riot_web_default_server_name: "{{ matrix_domain }}"
+```
+
+The login page previously said "Sign in to your Matrix account on matrix.example.org" (the homeserver's domain name). It will now say "Sign in ... on example.org" (the server name) by default, or "Sign in ... on Our Server" if you set the variable to "Our Server".
+
+To support this, the config.json template is changed to use the configuration key `default_server_config` for setting the default HS/IS, and the new configuration key `server_name` is added in there.
+
+
+# 2020-01-30
+
+## Disabling TLSv1.1
+
+To improve security, we've removed TLSv1.1 support from our default matrix-nginx-proxy configuration.
+
+If you need to support old clients, you can re-enable it with the following configuration: `matrix_nginx_proxy_ssl_protocols: "TLSv1.1 TLSv1.2 TLSv1.3"`
+
+
+# 2020-01-21
+
+## Postgres collation changes (action required!)
+
+By default, we've been using a UTF-8 collation for Postgres. This is known to cause Synapse some troubles (see the [relevant issue](https://github.com/matrix-org/synapse/issues/6722)) on systems that use [glibc](https://www.gnu.org/software/libc/). We run Postgres in an [Alpine Linux](https://alpinelinux.org/) container (which uses [musl](https://www.musl-libc.org/), and not glibc), so our users are likely not affected by the index corruption problem observed by others.
+
+Still, we might become affected in the future. In any case, it's imminent that Synapse will complain about databases which do not use a C collation.
+
+To avoid future problems, we recommend that you run the following command:
+
+```
+ansible-playbook -i inventory/hosts setup.yml --tags=upgrade-postgres --extra-vars='{"postgres_force_upgrade": true}'
+```
+
+It forces a [Postgres database upgrade](docs/maintenance-postgres.md#upgrading-postgresql), which would recreate your Postgres database using the proper (`C`) collation. If you are low on disk space, or run into trouble, refer to the Postgres database upgrade documentation page.
+
+
+# 2020-01-14
+
+## Added support for Appservice Webhooks
+
+Thanks to a contribution from [Björn Marten](https://github.com/tripleawwy) from [netresearch](https://www.netresearch.de/), the playbook can now install and configure [matrix-appservice-webhooks](https://github.com/turt2live/matrix-appservice-webhooks) for you. This bridge provides support for Slack-compatible webhooks.
+
+Learn more in [Setting up Appservice Webhooks](docs/configuring-playbook-bridge-appservice-webhooks.md).
+
+
+# 2020-01-12
+
+## Added support for automatic Double Puppeting for all Mautrix bridges
+
+Double Puppeting can now be easily enabled for all Mautrix bridges supported by the playbook (Facebook, Hangouts, Whatsapp, Telegram).
+
+This is possible due to those bridges' integration with [matrix-synapse-shared-secret-auth](https://github.com/devture/matrix-synapse-shared-secret-auth) - yet another component that this playbook can install for you.
+
+To get started, following the playbook's documentation for the bridge you'd like to configure.
+
+
+# 2019-12-06
+
+## Added support for an alternative method for using another webserver
+
+We have added support for making `matrix-nginx-proxy` not being so invasive, so that it would be easier to [use your own webserver](docs/configuring-playbook-own-webserver.md).
+
+The documentation has been updated with a **Method 2**, which might make "own webserver" setup easier in some cases (such as [reverse-proxying using Traefik](https://github.com/spantaleev/matrix-docker-ansible-deploy/issues/296)).
+
+**Existing users** are not affected by this and **don't need to change anything**.
+The defaults are still the same (`matrix-nginx-proxy` obtaining SSL certificates and doing everything for you automatically).
+
+
+# 2019-11-10
+
+## Tightened security around room directory publishing
+
+As per this [advisory blog post](https://matrix.org/blog/2019/11/09/avoiding-unwelcome-visitors-on-private-matrix-servers), we've decided to change the default publishing rules for the Matrix room directory.
+
+Our general goal is to favor privacy and security when running personal (family & friends) and corporate homeservers.
+Both of these likely benefit from having a more secure default of **not showing the room directory without authentication** and **not publishing the room directory over federation**.
+
+As with anything else, these new defaults can be overriden by changing the `matrix_synapse_allow_public_rooms_without_auth` and `matrix_synapse_allow_public_rooms_over_federation` variables, respectively.
+
+
+# 2019-10-05
+
+## Improved Postgres upgrading/importing
+
+Postgres [upgrading](docs/maintenance-postgres.md#upgrading-postgresql) and [importing](docs/importing-postgres.md) have been improved to add support for multiple databases and roles.
+
+Previously, the playbook would only take care of the `homeserver` database and `synapse` user.
+We now back up and restore all databases and users on the Postgres server.
+
+For now, the playbook only uses that one database (`homeserver`) and that one single user (`synapse`), so it's all the same.
+However, in the future, additional components besides Synapse may also make use the Postgres database server.
+One such example is the [matrix-appservice-slack](https://github.com/matrix-org/matrix-appservice-slack) bridge, which strongly encourages use of Postgres in its v1.0 release. We are yet to upgrade to it.
+
+Additionally, Postgres [upgrading](docs/maintenance-postgres.md#upgrading-postgresql) now uses gzipped dump files by default, to minimize disk space usage.
+
+
+# 2019-10-04
+
+## Postgres 12 support
+
+The playbook now installs [Postgres 12](https://www.postgresql.org/about/news/1976/) by default.
+
+If you have have an existing setup, it's likely running on an older Postgres version (9.x, 10.x or 11.x). You can easily upgrade by following the [upgrading PostgreSQL guide](docs/maintenance-postgres.md#upgrading-postgresql).
+
+
+# 2019-10-03
+
+## Synapse 1.4.0
+
+Synapse 1.4.0 [is out](https://matrix.org/blog/2019/10/03/synapse-1-4-0-released) with lots of changes related to privacy.
+
+Its new defaults (which we adopt as well) mean that certain old data will automatically get purged after a certain number of days. 1.4.0 automatically garbage collects redacted messages (defaults to 7 days) and removes unused IP and user agent information stored in the user_ips table (defaults to 30 days). If you'd like to preserve this data, we encourage you to look at the `redaction_retention_period` and `user_ips_max_age` options (controllable by the `matrix_synapse_redaction_retention_period` and `matrix_synapse_user_ips_max_age` playbook variables, respectively) before doing the upgrade. If you'd like to keep data indefinitely, set these variables to `null` (e.g. `matrix_synapse_redaction_retention_period: ~`).
+
+From now on the `trusted_key_servers` setting for Synapse is configurable. It still defaults to `matrix.org` just like it always has, but in a more explicit way now. If you'd like to use another trusted key server, adjust the `matrix_synapse_trusted_key_servers` playbook variable.
+
+Synapse 1.4.0 also changes lots of things related to identity server integration.
+Because Synapse will now by default be responsible for validating email addresses for user accounts, running without an identity server looks more feasible.
+We still [have concerns](https://github.com/spantaleev/matrix-docker-ansible-deploy/pull/275/files#r331104117) over disabling the identity server by default, so for now it remains enabled.
+
+
 # 2019-09-09
 
 ## Synapse Simple Antispam support

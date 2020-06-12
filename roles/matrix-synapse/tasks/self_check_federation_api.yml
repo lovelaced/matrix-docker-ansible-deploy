@@ -3,7 +3,7 @@
 - name: Check Matrix Federation API
   uri:
     url: "{{ matrix_synapse_federation_api_url_endpoint_public }}"
-    follow_redirects: false
+    follow_redirects: none
     validate_certs: "{{ matrix_synapse_self_check_validate_certificates }}"
   register: result_matrix_synapse_federation_api
   ignore_errors: true
@@ -11,7 +11,7 @@
 
 - name: Fail if Matrix Federation API not working
   fail:
-    msg: "Failed checking Matrix Federation API is up at `{{ matrix_server_fqn_matrix }}` (checked endpoint: `{{ matrix_synapse_federation_api_url_endpoint_public }}`). Is Synapse running? Is port 8448 open in your firewall? Full error: {{ result_matrix_synapse_federation_api }}"
+    msg: "Failed checking Matrix Federation API is up at `{{ matrix_server_fqn_matrix }}` (checked endpoint: `{{ matrix_synapse_federation_api_url_endpoint_public }}`). Is Synapse running? Is port {{ matrix_federation_public_port }} open in your firewall? Full error: {{ result_matrix_synapse_federation_api }}"
   when: "matrix_synapse_enabled|bool and matrix_synapse_federation_enabled|bool and (result_matrix_synapse_federation_api.failed or 'json' not in result_matrix_synapse_federation_api)"
 
 - name: Fail if Matrix Federation API unexpectedly enabled

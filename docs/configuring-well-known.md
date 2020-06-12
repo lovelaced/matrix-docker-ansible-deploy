@@ -104,10 +104,39 @@ server {
 </VirtualHost>
 ```
 
-**For Caddy**, it would be something like this:
+**For Caddy 2**, it would be something like this:
 
 ```caddy
-proxy /.well-known/matrix https://matrix.DOMAIN
+reverse_proxy /.well-known/matrix/* https://matrix.DOMAIN {
+	header_up Host {http.reverse_proxy.upstream.hostport}
+}
+```
+
+**For Caddy 1**, it would be something like this:
+
+```caddy
+proxy /.well-known/matrix/ https://matrix.DOMAIN {
+    header_upstream Host {http.reverse_proxy.upstream.hostport}
+}
+```
+
+**For HAProxy**, it would be something like this:
+
+```haproxy
+frontend www-https
+	# Select a Challenge for Matrix federation redirect
+	acl matrix-acl path_beg /.well-known/matrix/
+	# Use the challenge backend if the challenge is set
+	use_backend matrix-backend if matrix-acl
+backend matrix-backend
+	# Redirects the .well-known matrix to the matrix server for federation.
+	http-request set-header Host matrix.example.com
+	server matrix matrix.example.com:80
+	# Map url path as ProxyPass does
+	reqirep ^(GET|POST|HEAD)\ /.well-known/matrix/(.*) \1\ /\2
+	# Rewrite redirects as ProxyPassReverse does
+	acl response-is-redirect res.hdr(Location) -m found
+	rsprep ^Location:\ (http|https)://matrix.example.com\/(.*) Location:\ \1://matrix.example.com/.well-known/matrix/\2 if response-is-redirect
 ```
 
 Make sure to:

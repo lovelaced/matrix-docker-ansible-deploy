@@ -4,13 +4,42 @@
 # Tasks related to setting up Coturn
 #
 
+- name: Ensure Matrix Coturn path exists
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: 0750
+    owner: "{{ matrix_user_username }}"
+    group: "{{ matrix_user_groupname }}"
+  with_items:
+    - { path: "{{ matrix_coturn_docker_src_files_path }}", when: "{{ matrix_coturn_container_image_self_build }}"}
+  when: matrix_riot_web_enabled|bool and item.when
+
 - name: Ensure Coturn image is pulled
   docker_image:
     name: "{{ matrix_coturn_docker_image }}"
     source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
     force_source: "{{ matrix_coturn_docker_image_force_pull if ansible_version.major > 2 or ansible_version.minor >= 8 else omit }}"
     force: "{{ omit if ansible_version.major > 2 or ansible_version.minor >= 8 else matrix_coturn_docker_image_force_pull }}"
-  when: matrix_coturn_enabled|bool
+  when: matrix_coturn_enabled|bool and not matrix_coturn_container_image_self_build
+
+- name: Ensure Coturn repository is present on self-build
+  git:
+    repo: https://github.com/instrumentisto/coturn-docker-image.git
+    dest: "{{ matrix_coturn_docker_src_files_path }}"
+    version: "{{ matrix_coturn_docker_image.split(':')[1] }}"
+    force: "yes"
+  when: "matrix_coturn_enabled|bool and matrix_coturn_container_image_self_build"
+
+- name: Ensure Coturn Docker image is built
+  docker_image:
+    name: "{{ matrix_coturn_docker_image }}"
+    source: build
+    build:
+      dockerfile: Dockerfile
+      path: "{{ matrix_coturn_docker_src_files_path }}"
+      pull: yes
+  when: "matrix_coturn_enabled|bool and matrix_coturn_container_image_self_build"
 
 - name: Ensure Coturn configuration path exists
   file:
@@ -18,7 +47,7 @@
     state: directory
     mode: 0750
     owner: "{{ matrix_user_username }}"
-    group: "{{ matrix_user_username }}"
+    group: "{{ matrix_user_groupname }}"
   when: matrix_coturn_enabled|bool
 
 - name: Ensure turnserver.conf installed
@@ -38,16 +67,17 @@
   register: matrix_coturn_result_docker_network
   changed_when: false
   when: matrix_coturn_enabled|bool
+  check_mode: no
 
 - name: Create Coturn network in Docker
   shell:
     cmd: "docker network create --driver=bridge {{ matrix_coturn_docker_network }}"
-  when: "matrix_coturn_enabled|bool and matrix_coturn_result_docker_network.stdout == ''"
+  when: "matrix_coturn_enabled|bool and matrix_coturn_result_docker_network.stdout == '' and not ansible_check_mode"
 
 - name: Ensure matrix-coturn.service installed
   template:
     src: "{{ role_path }}/templates/systemd/matrix-coturn.service.j2"
-    dest: "/etc/systemd/system/matrix-coturn.service"
+    dest: "{{ matrix_systemd_path }}/matrix-coturn.service"
     mode: 0644
   register: matrix_coturn_systemd_service_result
   when: matrix_coturn_enabled|bool
@@ -69,7 +99,7 @@
     hour: "4"
     minute: "20"
     day: "*/5"
-    job: /bin/systemctl reload matrix-coturn.service
+    job: "{{ matrix_host_command_systemctl }} reload matrix-coturn.service"
   when: "matrix_coturn_enabled|bool and matrix_coturn_tls_enabled|bool"
 
 
@@ -86,7 +116,7 @@
 
 - name: Check existence of matrix-coturn service
   stat:
-    path: "/etc/systemd/system/matrix-coturn.service"
+    path: "{{ matrix_systemd_path }}/matrix-coturn.service"
   register: matrix_coturn_service_stat
   when: "not matrix_coturn_enabled|bool"
 
@@ -100,7 +130,7 @@
 
 - name: Ensure matrix-coturn.service doesn't exist
   file:
-    path: "/etc/systemd/system/matrix-coturn.service"
+    path: "{{ matrix_systemd_path }}/matrix-coturn.service"
     state: absent
   when: "not matrix_coturn_enabled|bool and matrix_coturn_service_stat.stat.exists"
 

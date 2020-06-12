@@ -11,20 +11,24 @@ Wants={{ service }}
 
 [Service]
 Type=simple
-ExecStartPre=-/usr/bin/docker kill matrix-nginx-proxy
-ExecStartPre=-/usr/bin/docker rm matrix-nginx-proxy
+ExecStartPre=-{{ matrix_host_command_docker }} kill matrix-nginx-proxy
+ExecStartPre=-{{ matrix_host_command_docker }} rm matrix-nginx-proxy
 
-ExecStart=/usr/bin/docker run --rm --name matrix-nginx-proxy \
+ExecStart={{ matrix_host_command_docker }} run --rm --name matrix-nginx-proxy \
 			--log-driver=none \
 			--user={{ matrix_user_uid }}:{{ matrix_user_gid }} \
 			--cap-drop=ALL \
 			--read-only \
 			--tmpfs=/tmp:rw,noexec,nosuid,size={{ matrix_nginx_proxy_tmp_directory_size_mb }}m \
 			--network={{ matrix_docker_network }} \
-			-p 80:8080 \
-			-p 443:8443 \
-			{% if matrix_nginx_proxy_proxy_matrix_federation_api_enabled %}
-			-p 8448:8448 \
+			{% if matrix_nginx_proxy_container_http_host_bind_port %}
+			-p {{ matrix_nginx_proxy_container_http_host_bind_port }}:8080 \
+			{% endif %}
+			{% if matrix_nginx_proxy_https_enabled and matrix_nginx_proxy_container_https_host_bind_port %}
+			-p {{ matrix_nginx_proxy_container_https_host_bind_port }}:8443 \
+			{% endif %}
+			{% if matrix_nginx_proxy_proxy_matrix_federation_api_enabled and matrix_nginx_proxy_container_federation_host_bind_port %}
+			-p {{ matrix_nginx_proxy_container_federation_host_bind_port }}:8448 \
 			{% endif %}
 			-v {{ matrix_nginx_proxy_base_path }}/nginx.conf:/etc/nginx/nginx.conf:ro \
 			-v {{ matrix_nginx_proxy_data_path }}:/nginx-data:ro \
@@ -39,9 +43,9 @@ ExecStart=/usr/bin/docker run --rm --name matrix-nginx-proxy \
 			{% endfor %}
 			{{ matrix_nginx_proxy_docker_image }}
 
-ExecStop=-/usr/bin/docker kill matrix-nginx-proxy
-ExecStop=-/usr/bin/docker rm matrix-nginx-proxy
-ExecReload=/usr/bin/docker exec matrix-nginx-proxy /usr/sbin/nginx -s reload
+ExecStop=-{{ matrix_host_command_docker }} kill matrix-nginx-proxy
+ExecStop=-{{ matrix_host_command_docker }} rm matrix-nginx-proxy
+ExecReload={{ matrix_host_command_docker }} exec matrix-nginx-proxy /usr/sbin/nginx -s reload
 Restart=always
 RestartSec=30
 SyslogIdentifier=matrix-nginx-proxy

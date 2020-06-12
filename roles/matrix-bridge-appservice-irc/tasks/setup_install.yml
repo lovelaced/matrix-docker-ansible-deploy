@@ -13,7 +13,7 @@
     state: directory
     mode: 0750
     owner: "{{ matrix_user_username }}"
-    group: "{{ matrix_user_username }}"
+    group: "{{ matrix_user_groupname }}"
   with_items:
     - "{{ matrix_appservice_irc_base_path }}"
     - "{{ matrix_appservice_irc_config_path }}"
@@ -50,7 +50,7 @@
     dest: "{{ matrix_appservice_irc_config_path }}/config.yaml"
     mode: 0644
     owner: "{{ matrix_user_username }}"
-    group: "{{ matrix_user_username }}"
+    group: "{{ matrix_user_groupname }}"
 
 - name: Check if Appservice IRC passkey exists
   stat:
@@ -58,7 +58,7 @@
   register: irc_passkey_file
 
 - name: Generate Appservice IRC passkey if it doesn't exist
-  shell: /usr/bin/openssl genpkey -out {{ matrix_appservice_irc_data_path }}/passkey.pem -outform PEM -algorithm RSA -pkeyopt rsa_keygen_bits:2048
+  shell: "{{ matrix_host_command_openssl }} genpkey -out {{ matrix_appservice_irc_data_path }}/passkey.pem -outform PEM -algorithm RSA -pkeyopt rsa_keygen_bits:2048"
   become: true
   become_user: "{{ matrix_user_username }}"
   when: "not irc_passkey_file.stat.exists"
@@ -70,7 +70,7 @@
     path: "{{ matrix_appservice_irc_data_path }}/passkey.pem"
     mode: 0644
     owner: "{{ matrix_user_username }}"
-    group: "{{ matrix_user_username }}"
+    group: "{{ matrix_user_groupname }}"
 
 # Ideally, we'd like to generate the final registration.yaml file by ourselves.
 #
@@ -93,18 +93,20 @@
 # to produce a final registration.yaml file, as we desire.
 - name: Generate Appservice IRC registration-template.yaml
   shell: >-
-    /usr/bin/docker run --rm --name matrix-appservice-irc-gen
+    {{ matrix_host_command_docker }} run --rm --name matrix-appservice-irc-gen
     --user={{ matrix_user_uid }}:{{ matrix_user_gid }}
     --cap-drop=ALL
     -v {{ matrix_appservice_irc_config_path }}:/config:z
     -v {{ matrix_appservice_irc_data_path }}:/data:z
+    --entrypoint=/bin/bash
     {{ matrix_appservice_irc_docker_image }}
-    node app.js
+    -c
+    'node app.js
     -r
     -f /config/registration-template.yaml
     -u "http://matrix-appservice-irc:9999"
     -c /config/config.yaml
-    -l irc_bot
+    -l irc_bot'
   changed_when: false
 
 - name: Read Appservice IRC registration-template.yaml
@@ -132,12 +134,12 @@
     dest: "{{ matrix_appservice_irc_config_path }}/registration.yaml"
     mode: 0644
     owner: "{{ matrix_user_username }}"
-    group: "{{ matrix_user_username }}"
+    group: "{{ matrix_user_groupname }}"
 
 - name: Ensure matrix-appservice-irc.service installed
   template:
     src: "{{ role_path }}/templates/systemd/matrix-appservice-irc.service.j2"
-    dest: "/etc/systemd/system/matrix-appservice-irc.service"
+    dest: "{{ matrix_systemd_path }}/matrix-appservice-irc.service"
     mode: 0644
   register: matrix_appservice_irc_systemd_service_result
 
