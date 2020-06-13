@@ -148,7 +148,7 @@ matrix_synapse_report_stats: false
 # Controls whether the Matrix server will track presence status (online, offline, unavailable) for users.
 # If users participate in large rooms with many other servers,
 # disabling this will decrease server load significantly.
-matrix_synapse_use_presence: true
+matrix_synapse_use_presence: false
 
 # Controls whether accessing the server's public rooms directory can be done without authentication.
 # For private servers, you most likely wish to require authentication,
@@ -160,7 +160,7 @@ matrix_synapse_allow_public_rooms_without_auth: false
 matrix_synapse_allow_public_rooms_over_federation: false
 
 # Controls whether people with access to the homeserver can register by themselves.
-matrix_synapse_enable_registration: false
+matrix_synapse_enable_registration: true
 
 # Allows non-server-admin users to create groups on this server
 matrix_synapse_enable_group_creation: false
@@ -263,10 +263,7 @@ matrix_synapse_metrics_port: 9100
 matrix_synapse_manhole_enabled: false
 
 # Enable support for Synapse workers
-matrix_synapse_workers_enabled: false
-
-# List of workers to spawn
-matrix_synapse_workers_enabled_list: []
+matrix_synapse_workers_enabled: true
 
 # Default list of workers to spawn
 matrix_synapse_workers_enabled_list:

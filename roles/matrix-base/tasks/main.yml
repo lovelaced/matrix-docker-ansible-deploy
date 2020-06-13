@@ -12,11 +12,6 @@
   tags:
     - setup-all
 
-- import_tasks: "{{ role_path }}/tasks/setup_server_base.yml"
-  when: run_setup|bool and matrix_install_server_packages|bool
-  tags:
-    - setup-all
-
 # This needs to always run, because it populates `matrix_user_uid` and `matrix_user_gid`,
 # which are required by many other roles.
 - import_tasks: "{{ role_path }}/tasks/setup_matrix_user.yml"
@@ -24,6 +19,11 @@
   tags:
     - always
     - setup-system-user
+
+- import_tasks: "{{ role_path }}/tasks/setup_docker.yml"
+  when: run_setup|bool
+  tags:
+    - setup-all
 
 - import_tasks: "{{ role_path }}/tasks/setup_matrix_base.yml"
   when: run_setup|bool
