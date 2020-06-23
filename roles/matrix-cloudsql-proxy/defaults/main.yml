@@ -2,4 +2,4 @@
 matrix_cloudsql_environment: "test-installations-222013:europe-west1"
 matrix_cloudsql_proxy_docker_image: "gcr.io/cloudsql-docker/gce-proxy:1.16"
 matrix_cloudsql_proxy_local_ip: "127.0.0.1:5432:5432"
-matrix_cloudsql_proxy_instace_url: "{{ matrix_cloudsql_environment }}:erin-matrix-database-test=tcp:0.0.0.0:5432"
+matrix_cloudsql_proxy_instance_url: "{{ matrix_cloudsql_environment }}:erin-matrix-database-test=tcp:0.0.0.0:5432"
