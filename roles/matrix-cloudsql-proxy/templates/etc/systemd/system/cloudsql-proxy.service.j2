@@ -1,0 +1,24 @@
+[Unit]
+Description=Matrix cloudsql proxy
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill %p
+ExecStartPre=-/usr/bin/docker rm -f %p
+ExecStartPre=-/usr/bin/docker pull {{ matrix_cloudsql_proxy_docker_image }}
+ExecStart=/usr/bin/docker run \
+    --log-driver=journald \
+    --network matrix \
+    --name %p \
+    --rm \
+    --volume /etc/matrix-config/:/config \
+    -p {{ matrix_cloudsql_proxy_local_ip }} \
+    {{ matrix_cloudsql_proxy_docker_image }} /cloud_sql_proxy \
+    -instances={{ matrix_cloudsql_proxy_instace_url }} -credential_file=/config/matrix-cloudsql.json
+
+ExecStop=-/usr/bin/docker stop %p
+
+[Install]
+WantedBy=multi-user.target
