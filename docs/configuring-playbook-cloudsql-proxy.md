@@ -6,8 +6,8 @@ After creation of the Google CloudSQL resources, the following is required:
 * Encrypt the service account JSON and the synapse database password with ansible-vault.
 * Configure your variables in `inventory/host_vars/<your-matrix-domain>/vars.yml:
   - matrix_postgres_enabled: false # this is so we use an external postgres instance
-  - matrix_cloudsql_proxy_project: "test-installations-222013"
-  - matrix_cloudsql_proxy_region: "europe-west1"
+  - matrix_cloudsql_proxy_project: "your-project-name"
+  - matrix_cloudsql_proxy_region: "europe-west1-or-your-region"
   - matrix_synapse_database_host: "172.17.0.1"
   - matrix_cloudsql_proxy_ip: "172.17.0.1:5432:5432"
   - matrix_cloudsql_instance_name: "your-db-name"
