@@ -1,3 +1,5 @@
+# CloudSQL Proxy for Postgres in GCP
+
 After creation of the Google CloudSQL resources, the following is required:
 * Create user "synapse"
 * Obtain service account JSON for the CloudSQL Client Reader role for the instance.
