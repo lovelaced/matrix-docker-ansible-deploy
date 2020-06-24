@@ -16,7 +16,7 @@ ExecStart=/usr/bin/docker run \
     --volume /etc/matrix-config/:/config \
     -p {{ matrix_cloudsql_proxy_local_ip }} \
     {{ matrix_cloudsql_proxy_docker_image }} /cloud_sql_proxy \
-    -instances={{ matrix_cloudsql_proxy_instace_url }} -credential_file=/config/matrix-cloudsql.json
+    -instances={{ matrix_cloudsql_proxy_instance_url }} -credential_file=/config/matrix-cloudsql.json
 
 ExecStop=-/usr/bin/docker stop %p
 
