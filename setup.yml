@@ -21,9 +21,10 @@
       # - matrix-bridge-sms
     - matrix-synapse
     - matrix-riot-web
+      # - matrix-cloudsql-proxy
       # - matrix-jitsi
     - matrix-ma1sd
-    - matrix-dimension
+      # - matrix-dimension
       # - matrix-email2matrix
     - matrix-nginx-proxy
     - matrix-coturn
