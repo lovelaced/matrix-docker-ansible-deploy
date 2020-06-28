@@ -59,8 +59,19 @@ matrix_integration_manager_ui_url: ~
 # See: https://github.com/vector-im/riot-web/blob/develop/docs/jitsi.md#configuring-riot-to-use-your-self-hosted-jitsi-server
 matrix_riot_jitsi_preferredDomain: ''
 
+# Controls whether Riot should use End-to-End Encryption by default.
+# Setting this to false will update `/.well-known/matrix/client` and tell Riot clients to avoid E2EE.
+# See: https://github.com/vector-im/riot-web/blob/develop/docs/e2ee.md
+matrix_riot_e2ee_default: true
+
 # The Docker network that all services would be put into
 matrix_docker_network: "matrix"
+
+# Controls whether we'll preserve the vars.yml file on the Matrix server.
+# If you have a differently organized inventory, you may wish to disable this feature,
+# or to repoint `matrix_vars_yml_snapshotting_src` to the file you'd like to preserve.
+matrix_vars_yml_snapshotting_enabled: true
+matrix_vars_yml_snapshotting_src: "{{ inventory_dir }}/host_vars/{{ inventory_hostname }}/vars.yml"
 
 # Controls whether a `/.well-known/matrix/server` file is generated and used at all.
 #
