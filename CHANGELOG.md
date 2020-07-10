@@ -1,3 +1,28 @@
+# 2020-07-03
+
+## Steam bridging support via mx-puppet-steam
+
+Thanks to [Hugues Morisset](https://github.com/izissise)'s efforts, the playbook now supports bridging to [Steam](https://steamapp.com/) via the [mx-puppet-steam](https://github.com/icewind1991/mx-puppet-steam) bridge. See our [Setting up MX Puppet Steam bridging](docs/configuring-playbook-bridge-mx-puppet-steam.md) documentation page for getting started.
+
+
+# 2020-07-01
+
+## Discord bridging support via mx-puppet-discord
+
+Thanks to [Hugues Morisset](https://github.com/izissise)'s efforts, the playbook now supports bridging to [Discord](https://discordapp.com/) via the [mx-puppet-discord](https://github.com/Sorunome/mx-puppet-discord) bridge. See our [Setting up MX Puppet Discord bridging](docs/configuring-playbook-bridge-mx-puppet-discord.md) documentation page for getting started.
+
+**Note**: this is a new Discord bridge. The playbook still retains Discord bridging via [matrix-appservice-discord](docs/configuring-playbook-bridge-appservice-discord.md). You're free too use the bridge that serves you better, or even both (for different users and use-cases).
+
+
+# 2020-06-30
+
+## Instagram and Twitter bridging support
+
+Thanks to [Johanna Dorothea Reichmann](https://github.com/jdreichmann)'s efforts, the playbook now supports bridging to [Instagram](https://www.instagram.com/) via the [mx-puppet-instagram](https://github.com/Sorunome/mx-puppet-instagram) bridge. See our [Setting up MX Puppet Instagram bridging](docs/configuring-playbook-bridge-mx-puppet-instagram.md) documentation page for getting started.
+
+Thanks to [Tulir Asokan](https://github.com/tulir)'s efforts, the playbook now supports bridging to [Twitter](https://twitter.com/) via the [mx-puppet-twitter](https://github.com/Sorunome/mx-puppet-twitter) bridge. See our [Setting up MX Puppet Twitter bridging](docs/configuring-playbook-bridge-mx-puppet-twitter.md) documentation page for getting started.
+
+
 # 2020-06-28
 
 ## (Post Mortem / fixed Security Issue) Re-enabling User Directory search powered by the ma1sd Identity Server
