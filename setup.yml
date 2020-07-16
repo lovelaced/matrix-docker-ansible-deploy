@@ -23,7 +23,7 @@
     - matrix-riot-web
       # - matrix-cloudsql-proxy
       # - matrix-jitsi
-    - matrix-ma1sd
+      # - matrix-ma1sd
       # - matrix-dimension
       # - matrix-email2matrix
     - matrix-nginx-proxy
